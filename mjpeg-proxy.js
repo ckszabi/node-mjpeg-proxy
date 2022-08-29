@@ -145,6 +145,11 @@ var MjpegProxy = exports.MjpegProxy = function(mjpegUrl, options, ontimeout) {
 
       self.mjpegRequest.on('error', function(e) {
         console.error('problem with request: ', e);
+        console.error('destroying request');
+        self.mjpegRequest = null;
+        if (self.globalMjpegResponse) {
+          self.globalMjpegResponse.destroy();
+        }
       });
       self.mjpegRequest.end();
     }
