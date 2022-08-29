@@ -36,12 +36,13 @@ function extractBoundary(contentType) {
   return contentType.substring(startIndex + 9, endIndex).replace(/"/gi,'').replace(/^\-\-/gi, '');
 }
 
-var MjpegProxy = exports.MjpegProxy = function(mjpegUrl) {
+var MjpegProxy = exports.MjpegProxy = function(mjpegUrl, options, ontimeout) {
   var self = this;
 
   if (!mjpegUrl) throw new Error('Please provide a source MJPEG URL');
 
   self.mjpegOptions = new URL(mjpegUrl);
+  self.options = options || { timeout: 5000 };
 
   self.audienceResponses = [];
   self.newAudienceResponses = [];
@@ -69,9 +70,28 @@ var MjpegProxy = exports.MjpegProxy = function(mjpegUrl) {
 
         var lastByte1 = null;
         var lastByte2 = null;
+        
+        // Timeout handler
+        self.to = setTimeout(function() {
+          mjpegResponse.emit('timeout');
+
+          // Abort current request and remove
+          self.mjpegRequest.abort();
+          self.mjpegRequest = null;
+          if (self.globalMjpegResponse) {
+            self.globalMjpegResponse.destroy();
+          }
+
+          res.end();
+        }, self.options.timeout);
+
+        if (ontimeout)
+          mjpegResponse.on('timeout', ontimeout);
 
         mjpegResponse.on('data', function(chunk) {
           // Fix CRLF issue on iOS 6+: boundary should be preceded by CRLF.
+          clearTimeout(self.to);
+
           var buff = Buffer.from(chunk);
           if (lastByte1 != null && lastByte2 != null) {
             var oldheader = '--' + self.boundary;
@@ -103,8 +123,13 @@ var MjpegProxy = exports.MjpegProxy = function(mjpegUrl) {
               res.write(chunk);
             }
           }
+          
+          // Set next timeout on schedule
+          self.to = setTimeout(function() { mjpegResponse.emit('timeout'); }, self.options.timeout);
         });
         mjpegResponse.on('end', function () {
+          clearTimeout(self.to);
+
           // console.log("...end");
           for (var i = self.audienceResponses.length; i--;) {
             var res = self.audienceResponses[i];
@@ -112,6 +137,7 @@ var MjpegProxy = exports.MjpegProxy = function(mjpegUrl) {
           }
         });
         mjpegResponse.on('close', function () {
+          clearTimeout(self.to);
           // console.log("...close");
         });
       });
@@ -150,4 +176,6 @@ var MjpegProxy = exports.MjpegProxy = function(mjpegUrl) {
       }
     });
   }
+
+  return self;
 }
