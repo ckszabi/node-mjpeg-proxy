@@ -42,7 +42,8 @@ var MjpegProxy = exports.MjpegProxy = function(mjpegUrl, options, ontimeout) {
   if (!mjpegUrl) throw new Error('Please provide a source MJPEG URL');
 
   self.mjpegOptions = new URL(mjpegUrl);
-  self.options = options || { timeout: 5000 };
+  self.options = options || {};
+  self.options = Object.assign({ timeout: 5000, destroyRequestOnIdle: true }, self.options);
 
   self.audienceResponses = [];
   self.newAudienceResponses = [];
@@ -168,7 +169,8 @@ var MjpegProxy = exports.MjpegProxy = function(mjpegUrl, options, ontimeout) {
         self.newAudienceResponses.splice(self.newAudienceResponses.indexOf(res), 1); // remove from new
       }
 
-      if (self.audienceResponses.length == 0) {
+      // Only destroy on flag is set
+      if (self.options.destroyRequestOnIdle && self.audienceResponses.length == 0) {
         self.mjpegRequest = null;
         if (self.globalMjpegResponse) {
           self.globalMjpegResponse.destroy();
