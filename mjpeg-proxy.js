@@ -150,6 +150,9 @@ var MjpegProxy = exports.MjpegProxy = function(mjpegUrl, options, ontimeout) {
         if (self.globalMjpegResponse) {
           self.globalMjpegResponse.destroy();
         }
+        
+        // Should respond to browser
+        res.end();
       });
       self.mjpegRequest.end();
     }
