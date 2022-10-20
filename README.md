@@ -30,11 +30,19 @@ var MjpegProxy = require('mjpeg-proxy').MjpegProxy;
 var express = require('express');
 var app = express();
 
-app.get('/index1.jpg', new MjpegProxy('http://admin:admin@192.168.1.109/cgi/mjpg/mjpg.cgi').proxyRequest);
+app.get('/proxy/:ip/:port', (req, res)=>{
+	new MjpegProxy({
+		host: req.params.ip,
+		port: parseInt(req.params.ch),
+		method: "GET",
+		path: "/cgi/mjpg/mjpg.cgi",
+		auth: "admin:1234"
+	}).proxyRequest(req, res);
+})
 app.listen(8080);
 ```
 
-Here, it will create a proxy to the source video feed (`http://admin:admin@192.168.1.109/cgi/mjpg/mjpg.cgi`). You can now access the feed at `http://localhost:8080/index1.jpg`.
+Here, it will dinamically create a proxy to the source video feed (`http://admin:1234@<<YOUR IP>>:<<YOUR PORT>>/cgi/mjpg/mjpg.cgi`). You can now access the feed at `http://localhost:8080/proxy/<<YOUR IP>>/<<YOUR PORT>>`.
 
 API
 ---
