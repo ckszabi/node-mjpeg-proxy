@@ -39,9 +39,9 @@ function extractBoundary(contentType) {
 var MjpegProxy = exports.MjpegProxy = function(mjpegUrl) {
   var self = this;
 
-  if (!mjpegUrl) throw new Error('Please provide a source MJPEG URL');
+  if (!mjpegUrl) throw new Error('Please provide a source MJPEG URL config');
 
-  self.mjpegOptions = new URL(mjpegUrl);
+  self.mjpegOptions = mjpegUrl;
 
   self.audienceResponses = [];
   self.newAudienceResponses = [];
