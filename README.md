@@ -15,7 +15,7 @@ $ npm install mjpeg-proxy
 From source:
 
 ``` bash
-$ git clone https://github.com/legege/node-mjpeg-proxy.git
+$ git clone https://github.com/ckszabi/node-mjpeg-proxy.git
 $ cd node-mjpeg-proxy
 $ npm install
 ```
