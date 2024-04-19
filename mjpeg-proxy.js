@@ -36,11 +36,25 @@ function extractBoundary(contentType) {
   return contentType.substring(startIndex + 9, endIndex).replace(/"/gi,'').replace(/^\-\-/gi, '');
 }
 
+/**
+ * MjpegProxy
+ * @type {exports.MjpegProxy}
+ * @param mjpegUrl {string|Object} - URL to MJPEG stream or URL object
+ * @param mjpegUrl.host {string} - Hostname of MJPEG stream
+ * @param mjpegUrl.port {number} - Port of MJPEG stream
+ * @param mjpegUrl.path {string} - Path of MJPEG stream
+ * @param mjpegUrl.auth {string} - Basic authentication string
+ * @param mjpegUrl.method {string} - HTTP method eg GET
+ *
+ */
 var MjpegProxy = exports.MjpegProxy = function(mjpegUrl) {
   var self = this;
 
   if (!mjpegUrl) throw new Error('Please provide a source MJPEG URL config');
 
+  if (typeof mjpegUrl === 'string') {
+    mjpegUrl = new URL(mjpegUrl);
+  }
   self.mjpegOptions = mjpegUrl;
 
   self.audienceResponses = [];
